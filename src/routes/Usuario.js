@@ -24,10 +24,11 @@ usua.post('/RegisP',upload.single("foto"),RegitrarP)
 usua.post('/RegisC',upload.single("foto"),RegitrarC)
 usua.post('/RegisB',upload.single("foto"),RegitrarB)
 usua.post('/RegisV',upload.single("foto"),RegitrarV)
-usua.post('/posicion/:usaurio/:ci',refresh)
-usua.post('/AñadirS',Añadir)
+usua.post('/posicion/:usua/:ci',refresh)
+// La ruta lleva ñ: se registra también codificada (como la envían navegadores y apps) y sin ñ
+usua.post(['/AñadirS', encodeURI('/AñadirS'), '/AnadirS'],Añadir)
 usua.get('/solicitudes',solicitudes)
 
-usua.post('/posicion/estado/:usaurio/:ci',estado)
+usua.post('/posicion/estado/:usua/:ci',estado)
 
 export default usua

@@ -41,7 +41,7 @@ export const estado = async (req, res) => {
         console.log(req.params)
         const {usua,ci} = req.params
         const{estado} = req.body
-        await consul.query('UPDATE Conductor SET estado = $1  WHERE ci = $3 AND usua = $4 ',[estado,ci,usua])
+        await consul.query('UPDATE Conductor SET estado = $1  WHERE ci = $2 AND usua = $3 ',[estado,ci,usua])
         res.status(200).json("se actualizo Estado")   
     } catch (error) {
         res.send(error)
@@ -62,7 +62,7 @@ export const Añadir = async (req, res) => {
 
 export const solicitudes = async (req, res) => {
     try {
-        const resp = await consul.query('SELECT s.id, s.longitud_origen, s.latitud_origen, s.longitud_destino, s.latitud_destino, s.hora, s.monto,c.ci, u.nombre, v.modelo FROM solicitud s, Conductor c, Usuario u, vehiculo v WHERE s.conductor = c.ci AND c.usua = u.usua AND c.ci = v.ci_conductor AND c.estado = TRUE',[longitud_origen, latitud_origen, longitud_destino, latitud_destino, hora, monto, conductor])
+        const resp = await consul.query('SELECT s.id, s.longitud_origen, s.latitud_origen, s.longitud_destino, s.latitud_destino, s.hora, s.monto,c.ci, u.nombre, v.modelo FROM solicitud s, Conductor c, Usuario u, vehiculo v WHERE s.conductor = c.ci AND c.usua = u.usua AND c.ci = v.ci_conductor AND c.estado = TRUE')
         res.status(200).json(resp.rows)        
         return    
     } catch (error) {
@@ -81,8 +81,10 @@ export const IniciarSC = async (req, res) => {
         if(Buser.rowCount > 0){
             if(Buser.rows[0].conductor == true || C.rowCount > 0){
                 if(await helpers.descriptar(contrasena,Buser.rows[0].contraseña)){
-                    const Resp= await consul.query('SELECT * FROM Usuario,brevet,vehiculo where Usuario.usua = $1 and brevet.numero = $2, vehiculo.ci_conductor = $3  ',[usua,C.rows[0].ci,C.rows[0].ci])
+                    const Resp= await consul.query('SELECT * FROM Usuario,brevet,vehiculo where Usuario.usua = $1 and brevet.numero = $2 and vehiculo.ci_conductor = $3',[usua,C.rows[0].ci,C.rows[0].ci])
                     res.status(200).json(Resp)
+                } else {
+                    res.status(200).json("Contraseña Incorrecta")
                 }
             } else{
                 if(Buser.rows[0].pasajero == true ){
@@ -163,7 +165,7 @@ export const RegitrarB = async (req, res) => {
         }else{
             if(fecha_e<fecha_v){
                 await consul.query('INSERT INTO conductor (usua, ci) VALUES ($1 , $2)',[usua,numero])
-                const resp = await consul.query('INSERT INTO brevet (numero, fecha_e, fecha_v, categoria, foto)VALUES ($1,$2,$3,$4,$5)',[usua,fecha_e,fecha_v,categoria,foto])
+                const resp = await consul.query('INSERT INTO brevet (numero, fecha_e, fecha_v, categoria, foto)VALUES ($1,$2,$3,$4,$5)',[numero,fecha_e,fecha_v,categoria,foto])
                 res.status(200).json("Se Registro con exito")
             }else{
                 res.status(200).json("Brevet vencida")
